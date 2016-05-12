@@ -1,0 +1,38 @@
+canWrite for validation
+Message on saving Git Configuration
+
+DB connection string : update IP/Hostname, username, password to postgres standalone-full.xml
+Done - DB connection string : update IP/Hostname, username, password to postgres context.xml
+
+create new account in Git and docerkhub, create EAM base images for wildfly and tomcat
+
+
+https://github.com/tcseam/wildfly-9.0.1.Final.git
+https://github.com/tcseam/tomcat8J7.git
+https://github.com/tcseam/tomcat8J8.git
+
+https://blog.mikesir87.io/2015/12/creating-wildfly-docker-image-with-postgresql/
+
+FROM jboss/wildfly:9.0.1.Final
+MAINTAINER Enterprise AppsMaker mastercraft@tcs.com
+USER root
+
+ENV WILDFLY_VERSION 9.0.1.Final
+ENV JBOSS_HOME /opt/jboss/wildfly
+ENV POSTGRESQL_VERSION 9.4-1201-jdbc4					   
+
+ARG DB_HOST=postgres
+ARG DB_NAME=eamapp
+ARG DB_USER=postgres
+ARG DB_PASS=p@ssw0rd
+
+RUN /bin/sh -c '$JBOSS_HOME/bin/standalone.sh &' && \
+  sleep 10 && \
+  cd /tmp && \
+  curl --location --output postgresql-${POSTGRESQL_VERSION}.jar --url http://search.maven.org/remotecontent?filepath=org/postgresql/postgresql/${POSTGRESQL_VERSION}/postgresql-${POSTGRESQL_VERSION}.jar && \
+  $JBOSS_HOME/bin/jboss-cli.sh --connect --command="deploy /tmp/postgresql-${POSTGRESQL_VERSION}.jar" && \
+  $JBOSS_HOME/bin/jboss-cli.sh --connect --command="xa-data-source add --name=campstur --jndi-name=java:/jdbc/datasources/campsturDS --user-name=${DB_USER} --password=${DB_PASS} --driver-name=postgresql-9.4-1201-jdbc41.jar --xa-datasource-class=org.postgresql.xa.PGXADataSource --xa-datasource-properties=ServerName=${DB_HOST},PortNumber=5432,DatabaseName=${DB_NAME} --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter" && \
+  $JBOSS_HOME/bin/jboss-cli.sh --connect --command=:shutdown && \
+  rm -rf $JBOSS_HOME/standalone/configuration/standalone_xml_history/ $JBOSS_HOME/standalone/log/* && \
+  rm /tmp/postgresql-9.4*.jar && \
+  rm -rf /tmp/postgresql-*.jar
