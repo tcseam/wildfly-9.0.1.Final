@@ -4,9 +4,9 @@ MAINTAINER Enterprise AppsMaker mastercraft@tcs.com
 
 USER root
 
-COPY Deployment/org /opt/jboss/wildfly/modules/system/layers/base/org/postgresql/main
+COPY Deployment/org /opt/jboss/wildfly/modules/system/layers/base/org/
 
-COPY Deployment/oracle /opt/jboss/wildfly/modules/system/layers/base/com/
+COPY Deployment/oracle /opt/jboss/wildfly/modules/system/layers/base/com/oracle
 
 RUN chmod 777 /opt/jboss/wildfly/modules/system/layers/base/org/postgresql/main && \
  cd /opt/jboss/wildfly/modules/system/layers/base/org/postgresql/main && \
